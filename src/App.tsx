@@ -2,16 +2,30 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import "./App.css";
 import { Home } from "./pages/Home";
+import { ROUTES } from "./utils/consts";
+import { Services } from "./services";
+import { ThemeProvider } from "@emotion/react";
+import { theme } from "./theme";
+import { CssBaseline } from "@mui/material";
 
-function App() {
+interface Props {
+  services: Services;
+}
+
+export function App(props: Props) {
   const router = createBrowserRouter([
     {
-      path: "/",
-      element: <Home />,
+      path: ROUTES.home,
+      element: <Home services={props.services} />,
     },
   ]);
 
-  return <RouterProvider router={router} />;
+  return (
+    <ThemeProvider theme={theme}>
+      <>
+        <CssBaseline />
+        <RouterProvider router={router} />
+      </>
+    </ThemeProvider>
+  );
 }
-
-export default App;
