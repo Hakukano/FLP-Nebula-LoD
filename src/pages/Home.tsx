@@ -6,7 +6,7 @@ export function Home() {
   const { t } = useTranslation();
 
   const handleLaunchClick = () => {
-    window.location.href = "/noname";
+    window.location.href = "/noname/index.html";
   };
 
   const launchButton = (
