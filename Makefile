@@ -21,12 +21,12 @@ clean:
 	mkdir -p $(BIN_DIRECTORY)
 
 audit:
-	yarn audit
+	yarn && yarn audit
 	cd ${SERVER_DIRECTORY} && cargo deny check ban
 	cd ${NONAME_DIRECTORY} && cargo deny check ban
 
 lint:
-	yarn lint
+	yarn && yarn lint
 	cd ${SERVER_DIRECTORY} && cargo clippy -- -D warnings
 	cd ${NONAME_DIRECTORY} && cargo clippy -- -D warnings
 
@@ -35,7 +35,7 @@ test:
 	cd ${NONAME_DIRECTORY} && cargo test
 
 dev:
-	yarn tauri dev
+	yarn && yarn tauri dev
 
 bin:
 	rm -rf $(BIN_DIRECTORY)
@@ -44,5 +44,5 @@ bin:
 	cp $(NONAME_DIRECTORY)/target/release/noname ${BIN_DIRECTORY}/noname-${TARGET_TRIPLE}
 
 build: clean bin
-	yarn tauri build
+	yarn && yarn tauri build
 	cp -r $(SERVER_DIRECTORY)/target/release/bundle/* $(OUTPUT_DIRECTORY)/
