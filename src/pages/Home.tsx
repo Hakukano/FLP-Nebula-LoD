@@ -161,9 +161,9 @@ export function Home(props: Props) {
       <Stack alignItems="center" spacing={2}>
         {errorAlert}
         {infoTable}
-        <Divider />
+        <Divider sx={{ width: "100%", color: (th) => th.palette.grey[800] }} />
         {updateForm}
-        <Divider />
+        <Divider sx={{ width: "100%", color: (th) => th.palette.grey[800] }} />
         {launchForm}
       </Stack>
     </BasicLayout>
