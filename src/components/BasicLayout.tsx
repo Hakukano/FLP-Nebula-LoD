@@ -11,7 +11,7 @@ export function BasicLayout(props: Props) {
       sx={{
         height: "100vh",
         padding: 1,
-        background: (th) => th.palette.grey[300],
+        background: (th) => th.palette.background.paper,
       }}
     >
       <Stack>{props.children}</Stack>

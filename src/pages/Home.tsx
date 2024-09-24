@@ -125,24 +125,26 @@ export function Home(props: Props) {
       <Table>
         <TableBody>
           <TableRow>
-            <TableCell>{t("home.info.path")}</TableCell>
             <TableCell
               sx={{
                 color: (th) => th.palette.grey[200],
                 background: (th) => th.palette.grey[800],
               }}
             >
-              {noname.path}
+              {t("home.info.path")}
             </TableCell>
+            <TableCell>{noname.path}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>{t("home.info.updated_at")}</TableCell>
             <TableCell
               sx={{
                 color: (th) => th.palette.grey[200],
                 background: (th) => th.palette.grey[800],
               }}
             >
+              {t("home.info.updated_at")}
+            </TableCell>
+            <TableCell>
               {(noname.updated_at && new Date(noname.updated_at).toString()) ||
                 "N/A"}
             </TableCell>
