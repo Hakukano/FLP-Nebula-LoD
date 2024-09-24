@@ -13,7 +13,8 @@ async fn main() {
     let listener = TcpListener::bind(addr)
         .await
         .expect("Cannot bind http server");
-    println!("Listening on {}", addr);
+    println!("Listening on {addr}");
+    println!("The base path is {base_path:?}");
     let app = controllers::router(base_path);
     axum::serve(listener, app).await.unwrap();
 }
