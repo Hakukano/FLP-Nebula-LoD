@@ -4,7 +4,15 @@ export default {
   home: {
     info: {
       path: "Resource Location",
+      updated_at: "Updated At",
     },
-    launch: "Launch",
+    launch: {
+      submit: "Launch",
+    },
+    update: {
+      repo: "Repo url",
+      branch: "Branch name",
+      submit: "Update",
+    },
   },
 };

@@ -7,8 +7,12 @@ use crate::{models::noname::NonameStatus, utils::fs::noname_path, AppState};
 
 #[derive(Debug, thiserror::Error, Serialize)]
 pub enum Error {
+    #[error("IO error: {0}")]
+    Io(String),
     #[error("Shell command error: {0}")]
     TauriPluginShell(#[from] tauri_plugin_shell::Error),
+    #[error("Gix create error: {0}")]
+    GixCreate(String),
     #[error("Shell command is already running, please restart the app")]
     ShellCommandAlreadyRunning,
     #[error("Shell command failed")]
@@ -18,6 +22,35 @@ pub enum Error {
 #[tauri::command]
 pub fn noname_status(app: AppHandle) -> NonameStatus {
     NonameStatus::new(&app)
+}
+
+#[tauri::command]
+pub fn noname_update(app: AppHandle, repo: String, branch: String) -> Result<(), Error> {
+    let path = noname_path(app.app_handle());
+    std::fs::remove_dir_all(path.as_path()).map_err(|err| Error::Io(err.to_string()))?;
+
+    let mut prepare_fetch = gix::prepare_clone(repo, path)
+        .map_err(|err| Error::GixCreate(err.to_string()))?
+        .with_ref_name(Some(branch.as_str()))
+        .map_err(|err| Error::GixCreate(err.to_string()))?;
+
+    let (mut prepare_checkout, _) = prepare_fetch
+        .fetch_then_checkout(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)
+        .map_err(|err| Error::GixCreate(err.to_string()))?;
+    println!(
+        "Checking out into {:?} ...",
+        prepare_checkout.repo().work_dir().expect("should be there")
+    );
+
+    let (repo, _) = prepare_checkout
+        .main_worktree(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)
+        .map_err(|err| Error::GixCreate(err.to_string()))?;
+    println!(
+        "Repo cloned into {:?}",
+        repo.work_dir().expect("directory pre-created")
+    );
+
+    Ok(())
 }
 
 #[tauri::command]

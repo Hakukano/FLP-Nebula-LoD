@@ -7,27 +7,7 @@
   ],
   "permissions": [
     "core:default",
-    "fs:allow-read-file",
-    "fs:allow-read-dir",
-    "fs:allow-write-file",
-    "fs:allow-mkdir",
-    "fs:allow-applocaldata-read-recursive",
-    "fs:allow-applocaldata-write-recursive",
-    "shell:allow-open",
-    {
-      "identifier": "shell:allow-execute",
-      "allow": [
-        {
-          "args": [
-            {
-              "validator": ".*"
-            }
-          ],
-          "cmd": "",
-          "name": "bin/noname",
-          "sidecar": true
-        }
-      ]
-    }
+    "fs:default",
+    "shell:default"
   ]
 }

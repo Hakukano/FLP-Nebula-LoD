@@ -20,8 +20,9 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
+            controllers::noname::noname_launch,
             controllers::noname::noname_status,
-            controllers::noname::noname_launch
+            controllers::noname::noname_update,
         ])
         .setup(|app| {
             app.manage(AppState::default());

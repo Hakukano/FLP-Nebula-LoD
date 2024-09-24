@@ -10,6 +10,7 @@ import {
   CircularProgress,
   Alert,
   Collapse,
+  TextField,
 } from "@mui/material";
 
 import { BasicLayout } from "../components/BasicLayout";
@@ -24,8 +25,10 @@ interface Props {
 
 export function Home(props: Props) {
   const [loading, setLoading] = useState(false);
-  const [noname, setNoname] = useState<NonameStatusResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [noname, setNoname] = useState<NonameStatusResponse | null>(null);
+  const [repo, setRepo] = useState("https://github.com/libccy/noname.git");
+  const [branch, setBranch] = useState("master");
 
   const { t } = useTranslation();
 
@@ -35,6 +38,17 @@ export function Home(props: Props) {
       .launch({ expose: true })
       .then((resp) => {
         window.location.href = resp;
+      })
+      .catch((err) => setError(JSON.stringify(err)))
+      .finally(() => setLoading(false));
+  };
+
+  const handleUpdateClick = () => {
+    setLoading(true);
+    props.services.api.noname
+      .update({ repo, branch })
+      .then(() => {
+        window.location.reload();
       })
       .catch((err) => setError(JSON.stringify(err)))
       .finally(() => setLoading(false));
@@ -74,6 +88,18 @@ export function Home(props: Props) {
               {noname.path}
             </TableCell>
           </TableRow>
+          <TableRow>
+            <TableCell>{t("home.info.updated_at")}</TableCell>
+            <TableCell
+              sx={{
+                color: (th) => th.palette.grey[200],
+                background: (th) => th.palette.grey[800],
+              }}
+            >
+              {(noname.updated_at && new Date(noname.updated_at).toString()) ||
+                "N/A"}
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </TableContainer>
@@ -81,9 +107,37 @@ export function Home(props: Props) {
     <CircularProgress />
   );
 
+  const updateForm = (
+    <Stack spacing={2} sx={{ width: "100%" }}>
+      <TextField
+        label={t("home.update.repo")}
+        defaultValue={repo}
+        onChange={(ev) => setRepo(ev.target.value)}
+      />
+      <TextField
+        label={t("home.update.branch")}
+        defaultValue={branch}
+        onChange={(ev) => setBranch(ev.target.value)}
+      />
+      <Button
+        variant="contained"
+        color="warning"
+        disabled={loading}
+        onClick={handleUpdateClick}
+      >
+        {t("home.update.submit")}
+      </Button>
+    </Stack>
+  );
+
   const launchButton = (
-    <Button variant="contained" disabled={loading} onClick={handleLaunchClick}>
-      {t("home.launch")}
+    <Button
+      variant="contained"
+      disabled={loading}
+      onClick={handleLaunchClick}
+      sx={{ width: "100%" }}
+    >
+      {t("home.launch.submit")}
     </Button>
   );
 
@@ -92,6 +146,7 @@ export function Home(props: Props) {
       <Stack alignItems="center" spacing={2}>
         {errorAlert}
         {infoTable}
+        {updateForm}
         {launchButton}
       </Stack>
     </BasicLayout>
