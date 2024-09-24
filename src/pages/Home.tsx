@@ -11,6 +11,9 @@ import {
   Alert,
   Collapse,
   TextField,
+  FormControlLabel,
+  Checkbox,
+  Divider,
 } from "@mui/material";
 
 import { BasicLayout } from "../components/BasicLayout";
@@ -29,13 +32,14 @@ export function Home(props: Props) {
   const [noname, setNoname] = useState<NonameStatusResponse | null>(null);
   const [repo, setRepo] = useState("https://github.com/libccy/noname.git");
   const [branch, setBranch] = useState("master");
+  const [expose, setExpose] = useState(false);
 
   const { t } = useTranslation();
 
   const handleLaunchClick = () => {
     setLoading(true);
     props.services.api.noname
-      .launch({ expose: true })
+      .launch({ expose })
       .then((resp) => {
         window.location.href = resp;
       })
@@ -130,15 +134,26 @@ export function Home(props: Props) {
     </Stack>
   );
 
-  const launchButton = (
-    <Button
-      variant="contained"
-      disabled={loading}
-      onClick={handleLaunchClick}
-      sx={{ width: "100%" }}
-    >
-      {t("home.launch.submit")}
-    </Button>
+  const launchForm = (
+    <Stack spacing={2} sx={{ width: "100%" }}>
+      <FormControlLabel
+        control={
+          <Checkbox
+            defaultChecked={expose}
+            onChange={(ev) => setExpose(ev.target.checked)}
+          />
+        }
+        label={t("home.launch.expose")}
+      />
+      <Button
+        variant="contained"
+        disabled={loading}
+        onClick={handleLaunchClick}
+        sx={{ width: "100%" }}
+      >
+        {t("home.launch.submit")}
+      </Button>
+    </Stack>
   );
 
   return (
@@ -146,8 +161,10 @@ export function Home(props: Props) {
       <Stack alignItems="center" spacing={2}>
         {errorAlert}
         {infoTable}
+        <Divider />
         {updateForm}
-        {launchButton}
+        <Divider />
+        {launchForm}
       </Stack>
     </BasicLayout>
   );

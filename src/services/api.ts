@@ -31,7 +31,7 @@ export class Api {
     },
     update: (params: NonameUpdateParams) => {
       return this.invoke(
-        "noname_launch",
+        "noname_update",
         params,
       ) as Promise<NonameUpdateResponse>;
     },

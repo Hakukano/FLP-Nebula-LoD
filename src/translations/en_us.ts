@@ -7,6 +7,7 @@ export default {
       updated_at: "Updated At",
     },
     launch: {
+      expose: "Expose the server?",
       submit: "Launch",
     },
     update: {
