@@ -90,7 +90,7 @@ export function Home(props: Props) {
     setLoading(true);
     props.services.api.noname
       .launch({
-        bind_address: `${bindIp0}.${bindIp1}.${bindIp2}.${bindIp3}:${bindPort}`,
+        bindAddress: `${bindIp0}.${bindIp1}.${bindIp2}.${bindIp3}:${bindPort}`,
       })
       .then((resp) => {
         window.location.href = resp;
