@@ -45,3 +45,4 @@ bin:
 
 build: clean bin
 	yarn tauri build
+	cp -r $(SERVER_DIRECTORY)/target/release/bundle/* $(OUTPUT_DIRECTORY)/
