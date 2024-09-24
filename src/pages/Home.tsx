@@ -18,7 +18,7 @@ import {
 
 import { BasicLayout } from "../components/BasicLayout";
 import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   NonameStatusResponse,
   NonameUpdateStatus,
@@ -36,35 +36,44 @@ export function Home(props: Props) {
   const [noname, setNoname] = useState<NonameStatusResponse | null>(null);
   const [repo, setRepo] = useState("https://github.com/libccy/noname.git");
   const [branch, setBranch] = useState("master");
-  const [checkTimer, setCheckTimer] = useState<number | null>(null);
   const [updateStatus, setUpdateStatus] =
     useState<NonameUpdateStatusResponse | null>(null);
   const [expose, setExpose] = useState(false);
 
   const { t } = useTranslation();
 
+  let checkTimer: number | null = null;
+
+  const fetchNoname = useCallback(() => {
+    setLoading(true);
+    props.services.api.noname
+      .status()
+      .then((resp) => {
+        setNoname(resp);
+      })
+      .finally(() => setLoading(false));
+  }, [props.services.api.noname]);
+
   const handleUpdateClick = () => {
     setLoading(true);
     props.services.api.noname
       .update({ repo, branch })
       .then(() => {
-        setCheckTimer(
-          setInterval(() => {
-            props.services.api.noname.update_status().then((resp) => {
-              if (typeof resp === "object") {
-                setError(resp.Err);
-                if (checkTimer !== null) clearInterval(checkTimer);
-                setCheckTimer(null);
-                setUpdateStatus(null);
-                setLoading(false);
-              } else if (resp === NonameUpdateStatus.Ok) {
-                window.location.reload();
-              } else {
-                setUpdateStatus(resp);
-              }
-            });
-          }, 1000),
-        );
+        checkTimer = setInterval(() => {
+          props.services.api.noname.update_status().then((resp) => {
+            if (typeof resp === "object") {
+              setError(resp.Err);
+            }
+            if (typeof resp === "object" || resp === NonameUpdateStatus.Ok) {
+              if (checkTimer !== null) clearInterval(checkTimer);
+              checkTimer = null;
+              setUpdateStatus(null);
+              fetchNoname();
+            } else {
+              setUpdateStatus(resp);
+            }
+          });
+        }, 1000);
       })
       .catch((err) => {
         setError(JSON.stringify(err));
@@ -84,15 +93,8 @@ export function Home(props: Props) {
   };
 
   useEffect(() => {
-    setLoading(true);
-    props.services.api.noname
-      .status()
-      .then((resp) => {
-        setNoname(resp);
-        props.services.storage.noname.set(resp);
-      })
-      .finally(() => setLoading(false));
-  }, [props.services.api.noname, props.services.storage.noname]);
+    fetchNoname();
+  }, [fetchNoname]);
 
   const errorAlert = (
     <Collapse in={!!error} sx={{ width: "100%" }}>
