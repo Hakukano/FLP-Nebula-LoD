@@ -15,3 +15,19 @@ export interface NonameUpdateParams {
 }
 
 export type NonameUpdateResponse = void;
+
+export enum NonameUpdateStatus {
+  Pending = "Pending",
+  PrepareStarted = "PrepareStarted",
+  CheckoutStarted = "CheckoutStarted",
+  CloneStarted = "CloneStarted",
+  Ok = "Ok",
+}
+
+export interface NonameUpdateStatusError {
+  Err: string;
+}
+
+export type NonameUpdateStatusResponse =
+  | NonameUpdateStatus
+  | NonameUpdateStatusError;

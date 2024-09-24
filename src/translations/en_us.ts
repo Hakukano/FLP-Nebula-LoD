@@ -14,6 +14,8 @@ export default {
       repo: "Repo url",
       branch: "Branch name",
       submit: "Update",
+      updating:
+        "Updating the repo, please don't touch anything! Current status:",
     },
   },
 };

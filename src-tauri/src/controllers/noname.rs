@@ -1,6 +1,8 @@
+use std::sync::mpsc::{channel, Receiver, TryRecvError};
+
 use regex::Regex;
 use serde::Serialize;
-use tauri::{AppHandle, Manager};
+use tauri::{async_runtime::spawn_blocking, AppHandle, Manager};
 use tauri_plugin_shell::{process::CommandEvent, ShellExt};
 
 use crate::{models::noname::NonameStatus, utils::fs::noname_path, AppState};
@@ -11,8 +13,8 @@ pub enum Error {
     Io(String),
     #[error("Shell command error: {0}")]
     TauriPluginShell(#[from] tauri_plugin_shell::Error),
-    #[error("Gix create error: {0}")]
-    GixCreate(String),
+    #[error("Update is already running")]
+    UpdateAlreadyRunning,
     #[error("Shell command is already running, please restart the app")]
     ShellCommandAlreadyRunning,
     #[error("Shell command failed")]
@@ -24,33 +26,123 @@ pub fn noname_status(app: AppHandle) -> NonameStatus {
     NonameStatus::new(&app)
 }
 
+#[derive(Clone, Serialize)]
+pub enum NonameUpdateStatus {
+    Pending,
+    PrepareStarted,
+    CheckoutStarted,
+    CloneStarted,
+    Err(String),
+    Ok,
+}
+
+pub struct NonameUpdate {
+    status: NonameUpdateStatus,
+    rx: Receiver<NonameUpdateStatus>,
+}
+
 #[tauri::command]
 pub fn noname_update(app: AppHandle, repo: String, branch: String) -> Result<(), Error> {
+    if app
+        .state::<AppState>()
+        .noname_update
+        .lock()
+        .expect("Cannot acquire lock for noname update rx")
+        .is_some()
+    {
+        return Err(Error::UpdateAlreadyRunning);
+    }
+
     let path = noname_path(app.app_handle());
     std::fs::remove_dir_all(path.as_path()).map_err(|err| Error::Io(err.to_string()))?;
 
-    let mut prepare_fetch = gix::prepare_clone(repo, path)
-        .map_err(|err| Error::GixCreate(err.to_string()))?
-        .with_ref_name(Some(branch.as_str()))
-        .map_err(|err| Error::GixCreate(err.to_string()))?;
+    let (tx, rx) = channel::<NonameUpdateStatus>();
+    app.state::<AppState>()
+        .noname_update
+        .lock()
+        .expect("Cannot acquire lock for noname update rx")
+        .replace(NonameUpdate {
+            status: NonameUpdateStatus::Pending,
+            rx,
+        });
 
-    let (mut prepare_checkout, _) = prepare_fetch
-        .fetch_then_checkout(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)
-        .map_err(|err| Error::GixCreate(err.to_string()))?;
-    println!(
-        "Checking out into {:?} ...",
-        prepare_checkout.repo().work_dir().expect("should be there")
-    );
+    spawn_blocking(move || {
+        tx.send(NonameUpdateStatus::PrepareStarted)
+            .expect("Cannot send message through noname update channel");
 
-    let (repo, _) = prepare_checkout
-        .main_worktree(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)
-        .map_err(|err| Error::GixCreate(err.to_string()))?;
-    println!(
-        "Repo cloned into {:?}",
-        repo.work_dir().expect("directory pre-created")
-    );
+        match gix::prepare_clone(repo, path)
+            .map_err(|err| err.to_string())
+            .and_then(|prepare| {
+                prepare
+                    .with_ref_name(Some(branch.as_str()))
+                    .map_err(|_| "Invalid branch name".to_string())
+            }) {
+            Ok(mut prepare_fetch) => {
+                tx.send(NonameUpdateStatus::CheckoutStarted)
+                    .expect("Cannot send message through noname update channel");
+
+                match prepare_fetch
+                    .fetch_then_checkout(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)
+                {
+                    Ok((mut prepare_checkout, _)) => {
+                        tx.send(NonameUpdateStatus::CloneStarted)
+                            .expect("Cannot send message through noname update channel");
+
+                        match prepare_checkout
+                            .main_worktree(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)
+                        {
+                            Ok(_) => {
+                                tx.send(NonameUpdateStatus::Ok)
+                                    .expect("Cannot send message through noname update channel");
+                            }
+                            Err(err) => {
+                                tx.send(NonameUpdateStatus::Err(err.to_string()))
+                                    .expect("Cannot send message through noname update channel");
+                            }
+                        }
+                    }
+                    Err(err) => {
+                        tx.send(NonameUpdateStatus::Err(err.to_string()))
+                            .expect("Cannot send message through noname update channel");
+                    }
+                }
+            }
+            Err(err) => {
+                tx.send(NonameUpdateStatus::Err(err))
+                    .expect("Cannot send message through noname update channel");
+            }
+        }
+    });
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn noname_update_status(app: AppHandle) -> NonameUpdateStatus {
+    let state = app.state::<AppState>();
+    let mut update = state
+        .noname_update
+        .lock()
+        .expect("Cannot acquire lock for noname update rx");
+
+    let status = if let Some(update) = update.as_mut() {
+        match update.rx.try_recv() {
+            Ok(status) => {
+                update.status = status;
+            }
+            Err(TryRecvError::Disconnected) => update.status = NonameUpdateStatus::Ok,
+            _ => {}
+        };
+        update.status.clone()
+    } else {
+        NonameUpdateStatus::Ok
+    };
+
+    if matches!(status, NonameUpdateStatus::Ok | NonameUpdateStatus::Err(_)) {
+        update.take();
+    }
+
+    status
 }
 
 #[tauri::command]

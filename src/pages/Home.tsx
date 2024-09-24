@@ -19,7 +19,11 @@ import {
 import { BasicLayout } from "../components/BasicLayout";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
-import { NonameStatusResponse } from "../services/api/noname";
+import {
+  NonameStatusResponse,
+  NonameUpdateStatus,
+  NonameUpdateStatusResponse,
+} from "../services/api/noname";
 import { Services } from "../services";
 
 interface Props {
@@ -32,9 +36,41 @@ export function Home(props: Props) {
   const [noname, setNoname] = useState<NonameStatusResponse | null>(null);
   const [repo, setRepo] = useState("https://github.com/libccy/noname.git");
   const [branch, setBranch] = useState("master");
+  const [checkTimer, setCheckTimer] = useState<number | null>(null);
+  const [updateStatus, setUpdateStatus] =
+    useState<NonameUpdateStatusResponse | null>(null);
   const [expose, setExpose] = useState(false);
 
   const { t } = useTranslation();
+
+  const handleUpdateClick = () => {
+    setLoading(true);
+    props.services.api.noname
+      .update({ repo, branch })
+      .then(() => {
+        setCheckTimer(
+          setInterval(() => {
+            props.services.api.noname.update_status().then((resp) => {
+              if (typeof resp === "object") {
+                setError(resp.Err);
+                if (checkTimer !== null) clearInterval(checkTimer);
+                setCheckTimer(null);
+                setUpdateStatus(null);
+                setLoading(false);
+              } else if (resp === NonameUpdateStatus.Ok) {
+                window.location.reload();
+              } else {
+                setUpdateStatus(resp);
+              }
+            });
+          }, 1000),
+        );
+      })
+      .catch((err) => {
+        setError(JSON.stringify(err));
+        setLoading(false);
+      });
+  };
 
   const handleLaunchClick = () => {
     setLoading(true);
@@ -42,17 +78,6 @@ export function Home(props: Props) {
       .launch({ expose })
       .then((resp) => {
         window.location.href = resp;
-      })
-      .catch((err) => setError(JSON.stringify(err)))
-      .finally(() => setLoading(false));
-  };
-
-  const handleUpdateClick = () => {
-    setLoading(true);
-    props.services.api.noname
-      .update({ repo, branch })
-      .then(() => {
-        window.location.reload();
       })
       .catch((err) => setError(JSON.stringify(err)))
       .finally(() => setLoading(false));
@@ -73,6 +98,15 @@ export function Home(props: Props) {
     <Collapse in={!!error} sx={{ width: "100%" }}>
       <Alert severity="error" onClose={() => setError(null)}>
         {error}
+      </Alert>
+    </Collapse>
+  );
+
+  const updateProgress = (
+    <Collapse in={!!updateStatus} sx={{ width: "100%" }}>
+      <Alert severity="info">
+        {t("home.update.updating")}{" "}
+        {typeof updateStatus === "string" ? updateStatus : "N/A"}
       </Alert>
     </Collapse>
   );
@@ -115,12 +149,12 @@ export function Home(props: Props) {
     <Stack spacing={2} sx={{ width: "100%" }}>
       <TextField
         label={t("home.update.repo")}
-        defaultValue={repo}
+        value={repo}
         onChange={(ev) => setRepo(ev.target.value)}
       />
       <TextField
         label={t("home.update.branch")}
-        defaultValue={branch}
+        value={branch}
         onChange={(ev) => setBranch(ev.target.value)}
       />
       <Button
@@ -139,7 +173,7 @@ export function Home(props: Props) {
       <FormControlLabel
         control={
           <Checkbox
-            defaultChecked={expose}
+            checked={expose}
             onChange={(ev) => setExpose(ev.target.checked)}
           />
         }
@@ -147,7 +181,7 @@ export function Home(props: Props) {
       />
       <Button
         variant="contained"
-        disabled={loading}
+        disabled={loading || !noname || !noname.updated_at}
         onClick={handleLaunchClick}
         sx={{ width: "100%" }}
       >
@@ -160,6 +194,7 @@ export function Home(props: Props) {
     <BasicLayout>
       <Stack alignItems="center" spacing={2}>
         {errorAlert}
+        {updateProgress}
         {infoTable}
         <Divider sx={{ width: "100%", color: (th) => th.palette.grey[800] }} />
         {updateForm}

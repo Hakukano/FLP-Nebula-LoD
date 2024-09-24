@@ -2,6 +2,7 @@
 
 use std::sync::Mutex;
 
+use controllers::noname::NonameUpdate;
 use tauri::Manager;
 use tauri_plugin_shell::process::CommandChild;
 
@@ -12,6 +13,7 @@ mod utils;
 #[derive(Default)]
 struct AppState {
     noname_command_child: Mutex<Option<CommandChild>>,
+    noname_update: Mutex<Option<NonameUpdate>>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -23,6 +25,7 @@ pub fn run() {
             controllers::noname::noname_launch,
             controllers::noname::noname_status,
             controllers::noname::noname_update,
+            controllers::noname::noname_update_status,
         ])
         .setup(|app| {
             app.manage(AppState::default());

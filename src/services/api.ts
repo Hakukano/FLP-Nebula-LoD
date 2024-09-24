@@ -6,6 +6,7 @@ import {
   NonameLaunchResponse,
   NonameUpdateParams,
   NonameUpdateResponse,
+  NonameUpdateStatusResponse,
 } from "./api/noname";
 
 interface InvokeFn {
@@ -34,6 +35,11 @@ export class Api {
         "noname_update",
         params,
       ) as Promise<NonameUpdateResponse>;
+    },
+    update_status: () => {
+      return this.invoke(
+        "noname_update_status",
+      ) as Promise<NonameUpdateStatusResponse>;
     },
   };
 }
