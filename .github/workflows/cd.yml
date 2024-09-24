@@ -56,7 +56,7 @@ jobs:
 
       - name: install binaries
         run: |
-          cargo build --manifest-path src-noname --release
+          cargo build --manifest-path src-noname/Cargo.toml --release
           mkdir -p src-tauri/bin
           cp src-noname/target/release/noname src-tauri/bin/noname-${TARGET_TRIPLE}
 
