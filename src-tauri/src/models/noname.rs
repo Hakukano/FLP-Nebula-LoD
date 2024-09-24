@@ -1,7 +1,9 @@
 use std::{fs, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
-use tauri::{path::BaseDirectory, AppHandle, Manager};
+use tauri::AppHandle;
+
+use crate::utils::fs::noname_path;
 
 #[derive(Deserialize, Serialize)]
 pub struct Noname {
@@ -10,10 +12,7 @@ pub struct Noname {
 
 impl Noname {
     pub fn new(handle: &AppHandle) -> Self {
-        let path = handle
-            .path()
-            .resolve("noname", BaseDirectory::AppLocalData)
-            .expect("Cannot access AppLocalData directory");
+        let path = noname_path(handle);
 
         if !path.exists() {
             fs::create_dir_all(path.clone()).expect("Cannot create noname path");
