@@ -737,12 +737,14 @@ dependencies = [
 name = "flp-nebula-lod"
 version = "0.1.0"
 dependencies = [
+ "regex",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-fs",
  "tauri-plugin-shell",
+ "thiserror",
 ]
 
 [[package]]

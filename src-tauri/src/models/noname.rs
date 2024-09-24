@@ -6,13 +6,13 @@ use tauri::AppHandle;
 use crate::utils::fs::noname_path;
 
 #[derive(Deserialize, Serialize)]
-pub struct Noname {
+pub struct NonameStatus {
     pub path: PathBuf,
 }
 
-impl Noname {
-    pub fn new(handle: &AppHandle) -> Self {
-        let path = noname_path(handle);
+impl NonameStatus {
+    pub fn new(app: &AppHandle) -> Self {
+        let path = noname_path(app);
 
         if !path.exists() {
             fs::create_dir_all(path.clone()).expect("Cannot create noname path");

@@ -1,4 +1,4 @@
-import { Noname } from "./api/noname";
+import { NonameStatusResponse } from "./api/noname";
 
 export class Storage {
   noname = {
@@ -7,10 +7,10 @@ export class Storage {
       if (!data) {
         return null;
       } else {
-        return JSON.parse(data) as Noname;
+        return JSON.parse(data) as NonameStatusResponse;
       }
     },
-    set: (noname: Noname) => {
+    set: (noname: NonameStatusResponse) => {
       localStorage.setItem("noname", JSON.stringify(noname));
     },
   };
