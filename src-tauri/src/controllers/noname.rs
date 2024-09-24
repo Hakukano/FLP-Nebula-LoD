@@ -37,6 +37,8 @@ pub async fn noname_launch(app: AppHandle, expose: bool) -> Result<String, Error
         .sidecar("noname")
         .expect("noname server not found")
         .args([
+            "--parent-pid",
+            std::process::id().to_string().as_str(),
             "--bind-ip",
             if expose { "0.0.0.0:0" } else { "127.0.0.1:0" },
             "--base-path",

@@ -4,10 +4,14 @@ use clap::{command, Parser};
 use tokio::net::TcpListener;
 
 mod controllers;
+mod watcher;
 
 #[derive(Parser, Debug)]
 #[command(version)]
 struct Args {
+    #[arg(long)]
+    parent_pid: u32,
+
     #[arg(long)]
     bind_ip: String,
 
@@ -28,5 +32,7 @@ async fn main() {
         listener.local_addr().expect("Cannot get local address")
     );
     let app = controllers::router(Path::new(args.base_path.as_str()).to_path_buf());
-    axum::serve(listener, app).await.unwrap();
+    tokio::spawn(async move { axum::serve(listener, app).await });
+
+    watcher::run(args.parent_pid).await;
 }
