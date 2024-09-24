@@ -11,9 +11,10 @@ import {
   Alert,
   Collapse,
   TextField,
-  FormControlLabel,
-  Checkbox,
   Divider,
+  Grid2,
+  FormControl,
+  FormLabel,
 } from "@mui/material";
 
 import { BasicLayout } from "../components/BasicLayout";
@@ -38,7 +39,11 @@ export function Home(props: Props) {
   const [branch, setBranch] = useState("master");
   const [updateStatus, setUpdateStatus] =
     useState<NonameUpdateStatusResponse | null>(null);
-  const [expose, setExpose] = useState(false);
+  const [bindIp0, setBindIp0] = useState(127);
+  const [bindIp1, setBindIp1] = useState(0);
+  const [bindIp2, setBindIp2] = useState(0);
+  const [bindIp3, setBindIp3] = useState(1);
+  const [bindPort, setBindPort] = useState(19719);
 
   const { t } = useTranslation();
 
@@ -84,7 +89,9 @@ export function Home(props: Props) {
   const handleLaunchClick = () => {
     setLoading(true);
     props.services.api.noname
-      .launch({ expose })
+      .launch({
+        bind_address: `${bindIp0}.${bindIp1}.${bindIp2}.${bindIp3}:${bindPort}`,
+      })
       .then((resp) => {
         window.location.href = resp;
       })
@@ -149,16 +156,26 @@ export function Home(props: Props) {
 
   const updateForm = (
     <Stack spacing={2} sx={{ width: "100%" }}>
-      <TextField
-        label={t("home.update.repo")}
-        value={repo}
-        onChange={(ev) => setRepo(ev.target.value)}
-      />
-      <TextField
-        label={t("home.update.branch")}
-        value={branch}
-        onChange={(ev) => setBranch(ev.target.value)}
-      />
+      <Grid2 container spacing={1}>
+        <Grid2 size={8}>
+          <FormControl fullWidth>
+            <FormLabel>{t("home.update.repo")}</FormLabel>
+            <TextField
+              value={repo}
+              onChange={(ev) => setRepo(ev.target.value)}
+            />
+          </FormControl>
+        </Grid2>
+        <Grid2 size={4}>
+          <FormControl fullWidth>
+            <FormLabel>{t("home.update.branch")}</FormLabel>
+            <TextField
+              value={branch}
+              onChange={(ev) => setBranch(ev.target.value)}
+            />
+          </FormControl>
+        </Grid2>
+      </Grid2>
       <Button
         variant="contained"
         color="warning"
@@ -172,15 +189,49 @@ export function Home(props: Props) {
 
   const launchForm = (
     <Stack spacing={2} sx={{ width: "100%" }}>
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={expose}
-            onChange={(ev) => setExpose(ev.target.checked)}
-          />
-        }
-        label={t("home.launch.expose")}
-      />
+      <Grid2 container spacing={1}>
+        <Grid2 size={8}>
+          <FormControl fullWidth>
+            <FormLabel>{t("home.launch.bind_ip")}</FormLabel>
+            <Stack direction="row">
+              <TextField
+                type="number"
+                value={bindIp0}
+                onChange={(ev) => setBindIp0(parseInt(ev.target.value))}
+                sx={{ flexGrow: 1 }}
+              />
+              <TextField
+                type="number"
+                value={bindIp1}
+                onChange={(ev) => setBindIp1(parseInt(ev.target.value))}
+                sx={{ flexGrow: 1 }}
+              />
+              <TextField
+                type="number"
+                value={bindIp2}
+                onChange={(ev) => setBindIp2(parseInt(ev.target.value))}
+                sx={{ flexGrow: 1 }}
+              />
+              <TextField
+                type="number"
+                value={bindIp3}
+                onChange={(ev) => setBindIp3(parseInt(ev.target.value))}
+                sx={{ flexGrow: 1 }}
+              />
+            </Stack>
+          </FormControl>
+        </Grid2>
+        <Grid2 size={4}>
+          <FormControl fullWidth>
+            <FormLabel>{t("home.launch.bind_port")}</FormLabel>
+            <TextField
+              type="number"
+              value={bindPort}
+              onChange={(ev) => setBindPort(parseInt(ev.target.value))}
+            />
+          </FormControl>
+        </Grid2>
+      </Grid2>
       <Button
         variant="contained"
         disabled={loading || !noname || !noname.updated_at}

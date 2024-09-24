@@ -4,7 +4,7 @@ export interface NonameStatusResponse {
 }
 
 export interface NonameLaunchParams {
-  expose: boolean;
+  bind_address: string;
 }
 
 export type NonameLaunchResponse = string;

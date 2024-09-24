@@ -13,7 +13,7 @@ struct Args {
     parent_pid: u32,
 
     #[arg(long)]
-    bind_ip: String,
+    bind_address: String,
 
     #[arg(long)]
     base_path: String,
@@ -23,7 +23,7 @@ struct Args {
 async fn main() {
     let args = Args::parse();
 
-    let addr = SocketAddr::from_str(args.bind_ip.as_str()).expect("Invalid bind ip");
+    let addr = SocketAddr::from_str(args.bind_address.as_str()).expect("Invalid bind address");
     let listener = TcpListener::bind(addr)
         .await
         .expect("Cannot bind http server");

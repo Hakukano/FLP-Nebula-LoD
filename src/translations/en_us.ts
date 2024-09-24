@@ -7,7 +7,8 @@ export default {
       updated_at: "Updated At",
     },
     launch: {
-      expose: "Expose the server?",
+      bind_ip: "Bind ip",
+      bind_port: "Bind port",
       submit: "Launch",
     },
     update: {

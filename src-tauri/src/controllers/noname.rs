@@ -146,7 +146,7 @@ pub fn noname_update_status(app: AppHandle) -> NonameUpdateStatus {
 }
 
 #[tauri::command]
-pub async fn noname_launch(app: AppHandle, expose: bool) -> Result<String, Error> {
+pub async fn noname_launch(app: AppHandle, bind_address: String) -> Result<String, Error> {
     if app
         .state::<AppState>()
         .noname_command_child
@@ -164,8 +164,8 @@ pub async fn noname_launch(app: AppHandle, expose: bool) -> Result<String, Error
         .args([
             "--parent-pid",
             std::process::id().to_string().as_str(),
-            "--bind-ip",
-            if expose { "0.0.0.0:0" } else { "127.0.0.1:0" },
+            "--bind-address",
+            bind_address.as_str(),
             "--base-path",
             noname_path(app.app_handle())
                 .to_str()
