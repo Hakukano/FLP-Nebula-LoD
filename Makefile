@@ -7,10 +7,7 @@ SERVER_DIRECTORY = src-tauri
 
 BIN_DIRECTORY = $(SERVER_DIRECTORY)/bin
 
-.PHONY: usage clean audit lint test dev bin build
-
-usage:
-	echo "Usage: make [usage] [clean] [audit] [lint] [test] [dev] [build]"
+.PHONY: clean dev bin audit lint test build
 
 FORCE: ;
 
@@ -20,20 +17,6 @@ clean:
 	rm -rf $(BIN_DIRECTORY)
 	mkdir -p $(BIN_DIRECTORY)
 
-audit:
-	yarn && yarn audit
-	cd ${SERVER_DIRECTORY} && cargo deny check ban
-	cd ${NONAME_DIRECTORY} && cargo deny check ban
-
-lint:
-	yarn && yarn lint
-	cd ${SERVER_DIRECTORY} && cargo clippy -- -D warnings
-	cd ${NONAME_DIRECTORY} && cargo clippy -- -D warnings
-
-test:
-	cd ${SERVER_DIRECTORY} && cargo test
-	cd ${NONAME_DIRECTORY} && cargo test
-
 dev:
 	yarn && yarn tauri dev
 
@@ -42,6 +25,20 @@ bin:
 	mkdir -p $(BIN_DIRECTORY)
 	cd ${NONAME_DIRECTORY} && cargo build --release
 	cp $(NONAME_DIRECTORY)/target/release/noname ${BIN_DIRECTORY}/noname-${TARGET_TRIPLE}
+
+audit:
+	yarn && yarn audit
+	cd ${SERVER_DIRECTORY} && cargo deny check ban
+	cd ${NONAME_DIRECTORY} && cargo deny check ban
+
+lint: bin
+	yarn && yarn lint
+	cd ${SERVER_DIRECTORY} && cargo clippy -- -D warnings
+	cd ${NONAME_DIRECTORY} && cargo clippy -- -D warnings
+
+test: bin
+	cd ${SERVER_DIRECTORY} && cargo test
+	cd ${NONAME_DIRECTORY} && cargo test
 
 build: clean bin
 	yarn && yarn tauri build
