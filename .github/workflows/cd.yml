@@ -1,0 +1,29 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - "main"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.11.0
+      - run: make build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flp-nebula-lod-${{ matrix.os }}
+          path: out/*
+          overwrite: true
