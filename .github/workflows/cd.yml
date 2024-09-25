@@ -17,13 +17,13 @@ jobs:
       matrix:
         include:
           - platform: "macos-latest"
-            args: "--target aarch64-apple-darwin"
-          - platform: "macos-latest"
-            args: "--target x86_64-apple-darwin"
+            target: "aarch64-apple-darwin"
+          - platform: "macos-13"
+            target: "x86_64-apple-darwin"
           - platform: "ubuntu-22.04"
-            args: ""
+            target: "x86_64-unknown-linux-gnu"
           - platform: "windows-latest"
-            args: ""
+            target: "x86_64-pc-windows-msvc"
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -36,9 +36,6 @@ jobs:
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
-        with:
-          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04'
@@ -46,19 +43,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: Set TARGET_TRIPLE (non windows)
+      - name: build noname
+        run: cd src-noname && cargo build --release
+
+      - name: copy noname binary (non windows)
         if: matrix.platform != 'windows-latest'
-        run: echo "TARGET_TRIPLE=$(rustc -Vv | grep host | cut -f2 -d' ')" >> $GITHUB_ENV
+        run: cp src-noname/target/release/noname src-tauri/bin/noname-${{ matrix.target }}
 
-      - name: Set TARGET_TRIPLE (windows only)
+      - name: copy noname binary (windows only)
         if: matrix.platform == 'windows-latest'
-        run: echo "TARGET_TRIPLE=$(rustc -Vv | Select-String "host:" | ForEach-Object {$_.Line.split(" ")[1]})" >> $GITHUB_ENV
-
-      - name: install binaries
-        run: |
-          cargo build --manifest-path src-noname/Cargo.toml --release
-          mkdir -p src-tauri/bin
-          cp src-noname/target/release/noname src-tauri/bin/noname-${TARGET_TRIPLE}
+        run: cp src-noname/target/release/noname.exe src-tauri/bin/noname-${{ matrix.target }}.exe
 
       - name: install frontend dependencies
         run: yarn install
@@ -72,4 +66,3 @@ jobs:
           releaseBody: "See the assets to download this version and install."
           releaseDraft: true
           prerelease: false
-          args: ${{ matrix.args }}

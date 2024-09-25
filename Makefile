@@ -5,8 +5,6 @@ OUTPUT_DIRECTORY = out
 NONAME_DIRECTORY = src-noname
 SERVER_DIRECTORY = src-tauri
 
-BIN_DIRECTORY = $(SERVER_DIRECTORY)/bin
-
 .PHONY: clean dev bin audit lint test build
 
 FORCE: ;
@@ -14,17 +12,13 @@ FORCE: ;
 clean:
 	rm -rf $(OUTPUT_DIRECTORY)
 	mkdir -p ${OUTPUT_DIRECTORY}
-	rm -rf $(BIN_DIRECTORY)
-	mkdir -p $(BIN_DIRECTORY)
 
 dev:
 	yarn && yarn tauri dev
 
 bin:
-	rm -rf $(BIN_DIRECTORY)
-	mkdir -p $(BIN_DIRECTORY)
 	cd ${NONAME_DIRECTORY} && cargo build --release
-	cp $(NONAME_DIRECTORY)/target/release/noname ${BIN_DIRECTORY}/noname-${TARGET_TRIPLE}
+	cp $(NONAME_DIRECTORY)/target/release/noname $(SERVER_DIRECTORY)/bin/noname-${TARGET_TRIPLE}
 
 audit:
 	yarn && yarn audit
