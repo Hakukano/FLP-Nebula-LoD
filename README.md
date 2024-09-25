@@ -1,7 +1,12 @@
-# Tauri + React + Typescript
+# Fading Lumine Project - the Stage of Nebula - Legends of Dynasties
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+## Installation
 
-## Recommended IDE Setup
+### Macos
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+Due to the security policy on Macos, DMGs downloaded from browser can't be opened normally. To download from the release, use `wget` from the terminal.
+
+```sh
+wget https://github.com/Hakukano/FLP-Nebula-LoD/releases/download/va.b.c/flp-nebula-lod_a.b.c_aarch64.dmg
+open flp-nebula-lod_a.b.c_aarch64.dmg
+```
