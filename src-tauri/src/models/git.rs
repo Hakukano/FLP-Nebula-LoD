@@ -3,20 +3,21 @@ use std::{fs, path::PathBuf, time::UNIX_EPOCH};
 use serde::{Deserialize, Serialize};
 use tauri::AppHandle;
 
-use crate::utils::fs::noname_path;
+use crate::utils::fs::git_path;
 
 #[derive(Deserialize, Serialize)]
-pub struct NonameStatus {
+pub struct GitStatus {
+    pub name: String,
     pub path: PathBuf,
     pub updated_at: Option<u128>,
 }
 
-impl NonameStatus {
-    pub fn new(app: &AppHandle) -> Self {
-        let path = noname_path(app);
+impl GitStatus {
+    pub fn new(name: String, app: &AppHandle) -> Self {
+        let path = git_path(name.as_str(), app);
 
         if !path.exists() {
-            fs::create_dir_all(path.clone()).expect("Cannot create noname path");
+            fs::create_dir_all(path.clone()).expect("Cannot create git path");
         }
 
         let updated_at = path
@@ -27,6 +28,10 @@ impl NonameStatus {
             .and_then(|updated_at| updated_at.duration_since(UNIX_EPOCH).ok())
             .map(|updated_at| updated_at.as_millis());
 
-        Self { path, updated_at }
+        Self {
+            name,
+            path,
+            updated_at,
+        }
     }
 }

@@ -655,18 +655,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "noname"
-version = "0.1.0"
-dependencies = [
- "axum",
- "clap",
- "sysinfo",
- "tokio",
- "tower 0.5.1",
- "tower-http",
-]
-
-[[package]]
 name = "ntapi"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -929,6 +917,18 @@ checksum = "ce305eb0b4296696835b71df73eb912e0f1ffd2556a501fcede6e0c50349191c"
 dependencies = [
  "libc",
  "windows-sys",
+]
+
+[[package]]
+name = "static-server"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "clap",
+ "sysinfo",
+ "tokio",
+ "tower 0.5.1",
+ "tower-http",
 ]
 
 [[package]]
