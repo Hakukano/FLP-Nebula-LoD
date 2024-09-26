@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
-  NonameStatusResponse,
-  NonameLaunchParams,
-  NonameLaunchResponse,
-  NonameUpdateParams,
-  NonameUpdateResponse,
-  NonameUpdateStatusResponse,
-} from "./api/noname";
+  GitStatusParams,
+  GitStatusResponse,
+  GitLaunchParams,
+  GitLaunchResponse,
+  GitUpdateParams,
+  GitUpdateResponse,
+  GitUpdateStatusResponse,
+} from "./api/git";
 
 interface InvokeFn {
   (cmd: string, args?: any, options?: any): Promise<any>;
@@ -20,26 +21,20 @@ export class Api {
     this.invoke = invoke;
   }
 
-  noname = {
-    status: () => {
-      return this.invoke("noname_status") as Promise<NonameStatusResponse>;
+  git = {
+    status: (params: GitStatusParams) => {
+      return this.invoke("git_status", params) as Promise<GitStatusResponse>;
     },
-    launch: (params: NonameLaunchParams) => {
-      return this.invoke(
-        "noname_launch",
-        params,
-      ) as Promise<NonameLaunchResponse>;
-    },
-    update: (params: NonameUpdateParams) => {
-      return this.invoke(
-        "noname_update",
-        params,
-      ) as Promise<NonameUpdateResponse>;
+    update: (params: GitUpdateParams) => {
+      return this.invoke("git_update", params) as Promise<GitUpdateResponse>;
     },
     update_status: () => {
       return this.invoke(
-        "noname_update_status",
-      ) as Promise<NonameUpdateStatusResponse>;
+        "git_update_status",
+      ) as Promise<GitUpdateStatusResponse>;
+    },
+    launch: (params: GitLaunchParams) => {
+      return this.invoke("git_launch", params) as Promise<GitLaunchResponse>;
     },
   };
 }

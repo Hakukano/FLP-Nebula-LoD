@@ -2,7 +2,7 @@
 
 use std::sync::Mutex;
 
-use controllers::noname::NonameUpdate;
+use controllers::git::GitUpdate;
 use tauri::Manager;
 use tauri_plugin_shell::process::CommandChild;
 
@@ -12,8 +12,8 @@ mod utils;
 
 #[derive(Default)]
 struct AppState {
-    noname_command_child: Mutex<Option<CommandChild>>,
-    noname_update: Mutex<Option<NonameUpdate>>,
+    git_command_child: Mutex<Option<CommandChild>>,
+    git_update: Mutex<Option<GitUpdate>>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -22,10 +22,10 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
-            controllers::noname::noname_launch,
-            controllers::noname::noname_status,
-            controllers::noname::noname_update,
-            controllers::noname::noname_update_status,
+            controllers::git::git_launch,
+            controllers::git::git_status,
+            controllers::git::git_update,
+            controllers::git::git_update_status,
         ])
         .setup(|app| {
             app.manage(AppState::default());

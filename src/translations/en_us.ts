@@ -2,7 +2,16 @@ export default {
   language_name: "English (US)",
   title: "Legends of Dynasties",
   home: {
+    title: "Choose a game to continue",
+  },
+  game: {
+    noname: {
+      name: "Noname",
+    },
+  },
+  git: {
     info: {
+      name: "Name",
       path: "Resource Location",
       updated_at: "Updated At",
     },

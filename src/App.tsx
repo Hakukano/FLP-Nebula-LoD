@@ -1,12 +1,14 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-
 import "./App.css";
-import { Home } from "./pages/Home";
+
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { CssBaseline } from "@mui/material";
+import { ThemeProvider } from "@emotion/react";
+
+import { Git } from "./pages/Git";
 import { ROUTES } from "./utils/consts";
 import { Services } from "./services";
-import { ThemeProvider } from "@emotion/react";
+import { Home } from "./pages/Home";
 import { theme } from "./theme";
-import { CssBaseline } from "@mui/material";
 
 interface Props {
   services: Services;
@@ -16,7 +18,11 @@ export function App(props: Props) {
   const router = createBrowserRouter([
     {
       path: ROUTES.home,
-      element: <Home services={props.services} />,
+      element: <Home />,
+    },
+    {
+      path: ROUTES.noname,
+      element: <Git services={props.services} name="noname" />,
     },
   ]);
 

@@ -44,16 +44,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: build noname
-        run: cd src-noname && cargo build --release
+      - name: build static server
+        run: cd src-static-server && cargo build --release
 
-      - name: copy noname binary (non windows)
+      - name: copy static server binary (non windows)
         if: matrix.platform != 'windows-latest'
-        run: cp src-noname/target/release/noname src-tauri/bin/noname-${{ matrix.target }}
+        run: cp src-static-server/target/release/static-server src-tauri/bin/static-server-${{ matrix.target }}
 
-      - name: copy noname binary (windows only)
+      - name: copy static server binary (windows only)
         if: matrix.platform == 'windows-latest'
-        run: cp src-noname/target/release/noname.exe src-tauri/bin/noname-${{ matrix.target }}.exe
+        run: cp src-static-server/target/release/static-server.exe src-tauri/bin/static-server-${{ matrix.target }}.exe
 
       - name: install frontend dependencies
         run: yarn install

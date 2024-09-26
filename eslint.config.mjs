@@ -18,7 +18,7 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ["**/dist", "**/src-tauri", "**/src-noname"],
+    ignores: ["**/dist", "**/src-tauri", "**/src-static-server"],
   },
   ...fixupConfigRules(
     compat.extends(
